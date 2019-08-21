@@ -6,7 +6,7 @@ let addIcons = document.querySelectorAll('.add-icon');
 addIcons.forEach(function (icon){
     icon.innerHTML = addIcon
     if (Array.from(icon.classList).indexOf('small-icon') !== -1) {
-        smallIcon = addIcon.replace('width="30px" height="30px"', 'width="20px" height="20px"')
+        let smallIcon = addIcon.replace('width="30px" height="30px"', 'width="20px" height="20px"')
         icon.innerHTML = smallIcon;
     }
 });
@@ -15,7 +15,7 @@ let subIcons = document.querySelectorAll('.sub-icon');
 subIcons.forEach(function (icon){
     icon.innerHTML = subIcon
     if (Array.from(icon.classList).indexOf('small-icon') !== -1) {
-        smallIcon = subIcon.replace('width="30px" height="30px"', 'width="20px" height="20px"')
+        let smallIcon = subIcon.replace('width="30px" height="30px"', 'width="20px" height="20px"')
         icon.innerHTML = smallIcon;
     }
 });
@@ -36,7 +36,7 @@ function resizeInks() {
     let totalHeight = inksHeight + clockHeight + marginHeight;
     inksHeight = inksRatio * totalHeight;
     inks.style.setProperty('height', inksHeight);
-};
+}
 
 let subInks = document.querySelectorAll('.sub-inks');
 let subInksWidth = subInks[0].offsetWidth;
@@ -47,7 +47,7 @@ function resizeSubInks() {
     let windowWidth = window.innerWidth;
     subInksWidth = (subInksRatio) * windowWidth;
     subInks.forEach(subInk => subInk.style.setProperty('width', subInksWidth));
-};
+}
 
 let container = document.querySelector('.container');
 let containerWidth = container.offsetWidth;
@@ -58,7 +58,7 @@ function resizeContainer() {
     let windowWidth = window.innerWidth;
     containerWidth = (containerRatio) * windowWidth;
     container.style.setProperty('width', containerWidth);
-};
+}
 
 window.addEventListener('resize', function() {
     resizeInks();
@@ -69,7 +69,7 @@ window.addEventListener('resize', function() {
 function changeTitle() {
     let title = document.querySelector('title');
     title.textContent = document.querySelectorAll('.timer')[0].textContent;
-};
+}
 
 function padNum(num) {
     let string = '';
@@ -79,7 +79,7 @@ function padNum(num) {
         string = num.toString();
     }
     return string;
-};
+}
 
 function decrementTimer(element, timer) {
     let hours = Number(timer.slice(0, 2));
@@ -102,7 +102,7 @@ function decrementTimer(element, timer) {
         }
         changeTitle();
     }, 1);
-};
+}
 
 function incrementTimer(element, timer) {
     let hours = Number(timer.slice(0, 2));
@@ -120,7 +120,7 @@ function incrementTimer(element, timer) {
         }
         changeTitle();
     }, 1);
-};
+}
 
 let intervalID;
 function stopTimer(element, timer, intervalID) {
@@ -130,7 +130,7 @@ function stopTimer(element, timer, intervalID) {
     let seconds = Number(timer.slice(6, 8));
     timer = padNum(hours) + ':' + padNum(minutes) + ':' + padNum(seconds);
     element.textContent = timer;
-};
+}
 
 function getActiveMode() {
     let active = document.querySelector('.active');
@@ -140,7 +140,7 @@ function getActiveMode() {
     info['time'] = children[1].childNodes[1].textContent;
     info['mode'] = children[2].childNodes[1].textContent;
     return info;
-};
+}
 
 function switchActiveMode() {
     let workInks = document.querySelector('.work-inks');
@@ -150,7 +150,7 @@ function switchActiveMode() {
     let info = getActiveMode();
     let header = document.querySelector('.header');
     header.childNodes[1].textContent = info['mode'].toUpperCase();
-};
+}
 
 function switchTimer(element) {
     switchActiveMode();
@@ -160,7 +160,7 @@ function switchTimer(element) {
     } else if (info['mode'] === 'break') {
         intervalID = startTimer(element, info['time'])
     }
-};
+}
 
 function startTimer(element, timer) {
     let hours = Number(timer.slice(0, 2));
@@ -183,7 +183,7 @@ function startTimer(element, timer) {
         }
     }, 1000);
     return intervalID;
-};
+}
 
 function resetTimer(element) {
     let info = getActiveMode();
@@ -194,11 +194,24 @@ function resetTimer(element) {
     let timer = padNum(hours) + ':' + padNum(minutes) + ':' + padNum(seconds);
     element.textContent = timer;
     changeTitle();
-};
+}
 
 // click events
 
 let timers = document.querySelectorAll('.timer');
+
+let inksIcons = document.querySelectorAll('.inks .small-icon');
+inksIcons.forEach(icon => icon.addEventListener('mousedown', function() {
+    let ink = icon.parentNode.parentNode;
+    if (ink.classList.contains('active')) {
+        if (icon.classList.contains('add-icon')) {
+        incrementTimer(timers[0], timers[0].textContent);
+        }
+        if (icon.classList.contains('sub-icon')) {
+            decrementTimer(timers[0], timers[0].textContent);
+        }
+    }
+}));
 
 let decrementID;
 subIcons.forEach(icon => icon.addEventListener('mousedown', function() {
@@ -207,27 +220,10 @@ subIcons.forEach(icon => icon.addEventListener('mousedown', function() {
     let idx = iconArray.indexOf(icon);
     decrementID = setInterval(function() {
         decrementTimer(timers[idx], timers[idx].textContent);
+        decrementTimer(timers[0], timers[0].textContent);
     }, 1)
     playBtn.textContent = 'play';
 }));
-
-let inksIcons = document.querySelectorAll('.inks .small-icon');
-inksIcons.forEach(icon => icon.addEventListener('click', function() {
-    let info = getActiveMode();
-    let ink = icon.parentNode.parentNode;
-    if (ink.classList.contains('active')) {
-        if (icon.classList.contains('add-icon')) {
-        incrementTimer(timers[0], timers[0].textContent);
-        }
-        if (icon.classList.contains('sub-icon')) {
-            decrementTimer(timers[0], timers[0].textContent);
-            }
-        let inkTime = ink.querySelector('.label');
-        
-        
-    }
-}));
-
 
 subIcons.forEach(icon => icon.addEventListener('mouseup', function() {
     window.clearInterval(decrementID);
@@ -244,6 +240,7 @@ addIcons.forEach(icon => icon.addEventListener('mousedown', function() {
     let idx = iconArray.indexOf(icon);
     incrementID = setInterval(function() {
         incrementTimer(timers[idx], timers[idx].textContent);
+        incrementTimer(timers[0], timers[0].textContent);
     }, 1)
     playBtn.textContent = 'play';
 }));
